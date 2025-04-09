@@ -7,49 +7,82 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   // Skip logging for /favicon.ico
   if (req.path === "/favicon.ico") return next();
 
-  const logIncoming = () => {
+  const ENABLE_PRETTY_LOG = true;
+  const ENABLE_JSON_LOG = false; // Set to true if you prefer JSON logs
+
+  // Filter and redact sensitive cookies
+  const getFilteredCookies = (cookies: Record<string, string>) => {
+    const allowedCookies = ["accessToken", "refreshToken"];
+    return allowedCookies.reduce((acc, key) => {
+      if (cookies?.[key]) acc[key] = "[REDACTED]";
+      return acc;
+    }, {} as Record<string, string>);
+  };
+
+  // Filter headers (e.g. remove Authorization)
+  const getFilteredHeaders = (headers: Record<string, any>) => {
+    const filtered = { ...headers };
+    if (filtered.authorization) {
+      filtered.authorization = "[REDACTED]";
+    }
+    return filtered;
+  };
+
+  // Mask password if it's a login or register route
+  const sanitizeBody = (path: string, body: any) => {
+    if (
+      (path === "/api/auth/login" || path === "/api/auth/register") &&
+      typeof body === "object" &&
+      body?.password
+    ) {
+      return { ...body, password: "[REDACTED]" };
+    }
+    return body;
+  };
+
+  const logRequest = () => {
     try {
-      // Safely handle undefined or null for body and cookies
+      const sanitizedBody = sanitizeBody(req.path, req.body);
       const logData = {
         method: req.method,
         path: req.originalUrl,
         timestamp: new Date().toISOString(),
-        body: req.body && typeof req.body === "object" ? req.body : {}, // Ensure body is an object
-        cookies: req.cookies
-          ? { ...req.cookies, accessToken: "[REDACTED]", refreshToken: "[REDACTED]" }
-          : {},
+        ip: req.ip,
+        query: req.query,
+        body: sanitizedBody,
+        cookies: getFilteredCookies(req.cookies || {}),
+        headers: getFilteredHeaders(req.headers),
       };
 
-      // Logging incoming request
-      logger.info(JSON.stringify(logData, null, 2));
+      if (ENABLE_JSON_LOG) {
+        logger.info(JSON.stringify(logData, null, 2));
+      }
 
-      // Log detailed incoming request info
-      const lines = [
-        "Incoming Request",
-        `method: ${req.method}`,
-        `path: ${req.originalUrl}`,
-        `timestamp: ${new Date().toISOString()}`,
-        `body: ${JSON.stringify(req.body, null, 2)}`,
-      ];
-
-      // Log all lines
-      logger.info(lines.join("\n"));
+      if (ENABLE_PRETTY_LOG) {
+        const lines = [
+          "Incoming Request",
+          `method: ${logData.method}`,
+          `path: ${logData.path}`,
+          `timestamp: ${logData.timestamp}`,
+          `ip: ${logData.ip}`,
+          `query: ${JSON.stringify(logData.query, null, 2)}`,
+          `body: ${JSON.stringify(logData.body, null, 2)}`,
+        ];
+        logger.info(lines.join("\n"));
+      }
     } catch (error) {
       console.error("Logging error:", error);
-      next(error); // Pass the error to the next middleware
+      next(error);
     }
   };
 
-  // Execute the logging for incoming request
-  logIncoming();
+  logRequest();
 
-  // Listen to the response finish event to log response info
   res.on("finish", () => {
     const duration = Date.now() - start;
     const resultLabel = res.statusCode >= 400 ? "Request Failed" : "Request Succeeded";
-    const body = (res as any).__responseBody || {}; // Ensure response body is handled correctly
+    const body = (res as any).__responseBody || {};
 
-    // Prepare log lines for response
     const lines = [
       resultLabel,
       `method: ${req.method}`,
@@ -59,12 +92,10 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       `timestamp: ${new Date().toISOString()}`,
     ];
 
-    // Log response body if present
     if (Object.keys(body).length > 0) {
       lines.push(`response: ${JSON.stringify(body)}`);
     }
 
-    // Determine log level based on status code
     const level = res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
     logger[level](lines.join("\n"));
   });
