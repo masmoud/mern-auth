@@ -1,15 +1,18 @@
-You're absolutely right! I should have kept everything consistent in markdown format from the beginning. I appreciate your patience!
+# MERN Authentication App
 
-Here’s the full **updated README** template, keeping everything in markdown format:
+## 📝 Description
 
----
+A complete authentication application built with the MERN stack (MongoDB, Express, React, Node.js) and TypeScript. This application provides a robust authentication system with registration, login, logout, and token refresh functionality.
 
-````markdown
-# 🔐 MERN Auth App (TypeScript)
+### Key Features
 
-> A full-stack authentication app built with the MERN stack using TypeScript. Features JWT-based authentication, password hashing with bcryptjs, and centralized logging with Winston.
-
----
+- **Secure Authentication**: Registration and login with JWT (JSON Web Tokens)
+- **Role Management**: Distinction between regular users and administrators
+- **Enhanced Security**: Password hashing with bcryptjs
+- **Access and Refresh Tokens**: Dual token system for better security
+- **Advanced Logging**: Request logging with Winston
+- **Modular Architecture**: Clean and maintainable code structure
+- **RESTful API**: Well-defined endpoints for all authentication operations
 
 ## 📌 Table of Contents
 
@@ -23,8 +26,6 @@ Here’s the full **updated README** template, keeping everything in markdown fo
 - [Author](#author)
 - [License](#license)
 
----
-
 ## 🚀 Features
 
 - [x] User registration & login with JWT
@@ -35,8 +36,6 @@ Here’s the full **updated README** template, keeping everything in markdown fo
 - [x] MongoDB integration via Mongoose
 - [x] React frontend with Zustand for state management
 - [ ] Optional UI features like toasts, form validation, etc.
-
-> **Note**: Some features are still under development, including logging, error handling, and additional UI components.
 
 ---
 
@@ -71,7 +70,6 @@ Here’s the full **updated README** template, keeping everything in markdown fo
 git clone https://github.com/masmoud/mern-auth-app.git
 cd mern-auth-app
 ```
-````
 
 ### 2. Install dependencies
 
@@ -85,11 +83,11 @@ cd ../frontend
 npm install
 ```
 
-### 3. API Docuementation
+### 3. API Documentation
 
 You can find the API documentation in progress hosted on Postman:
 
-[API Docuementation](https://documenter.getpostman.com/view/31062366/2sB2cX91qP)
+[API Documentation](https://documenter.getpostman.com/view/31062366/2sB2cX91qP)
 
 ### 4. Create environment files
 
@@ -98,8 +96,12 @@ Create a `.env` file in the `backend` folder with the following variables:
 ```
 PORT=5000
 MONGO_URI=your_mongo_connection_string
-JWT_SECRET=your_jwt_secret
+ACCESS_TOKEN_SECRET=your_access_token_secret
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+ACCESS_TOKEN_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=1d
 NODE_ENV=development
+CLIENT_URL=http://localhost:5173
 ```
 
 ---
@@ -127,29 +129,30 @@ npm run build   # Builds the React app
 ```
 mern-auth-app/
 │
-├── client/              # React frontend
+├── frontend/            # React frontend (to be implemented)
 │   ├── src/
 │   │   ├── store/       # Zustand store for state management
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── App.tsx
+│   │   ├── components/  # Reusable components
+│   │   ├── pages/       # Application pages
+│   │   ├── hooks/       # Custom hooks
+│   │   └── App.tsx      # Application entry point
 │
-├── server/              # Express backend with TypeScript
+├── backend/             # Express backend with TypeScript
 │   ├── src/
-│   │   ├── confing/
-│   │   ├── controllers/
-│   │   ├── middlewares/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── validations/
-│   │   ├── app.ts
-│   │   └── server.ts
-├── screenshots/         # UI screenshots for README
+│   │   ├── config/      # Application configuration
+│   │   ├── controllers/ # Route controllers
+│   │   ├── middlewares/ # Express middlewares
+│   │   ├── models/      # Mongoose models
+│   │   ├── routes/      # API route definitions
+│   │   ├── services/    # Business logic
+│   │   ├── utils/       # Utilities and helpers
+│   │   ├── validations/ # Data validation
+│   │   ├── types/       # TypeScript types
+│   │   ├── app.ts       # Express configuration
+│   │   └── server.ts    # Server entry point
+├── screenshots/         # Screenshots for README
 ├── README.md
-└── ...
+└── LICENSE
 ```
 
 ---
