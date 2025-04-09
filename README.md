@@ -13,15 +13,15 @@ Here’s the full **updated README** template, keeping everything in markdown fo
 
 ## 📌 Table of Contents
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Scripts](#-scripts)
-- [Folder Structure](#-folder-structure)
-- [Screenshots](#-screenshots)
-- [Author](#-author)
-- [License](#-license)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Scripts](#scripts)
+- [Folder Structure](#folder-structure)
+- [Screenshots](#screenshots)
+- [Author](#author)
+- [License](#license)
 
 ---
 
