@@ -1,0 +1,46 @@
+
+node_modules/
+
+# Environment variables
+.env
+
+# Log files
+logs/
+*.log
+
+# Configuration files
+*.cfg
+*.conf
+*.config
+*.yaml
+*.yml
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.tmp
+*.swp
+*.swp
+
+# Temporary files
+*.tmp
+*.tmp.*
+*.tmp~
+*.tmp.*~
+*.tmp~.*
+
+# Cache files
+*.cache
+*.cache.*
+*.cache~
+*.cache.*~
+*.cache~.*
+
+# Debug files
+*.debug
+*.debug.*
+*.debug~
+*.debug.*~
+*.debug~.*
+
