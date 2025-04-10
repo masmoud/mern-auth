@@ -17,8 +17,8 @@ const startServer = async () => {
     const server = http.createServer(app);
 
     server.listen(env.PORT, () => {
-      logger.info(`Server is running on http://localhost:${env.PORT}`);
-      logger.info(`API Documentation: ${env.POSTMAN_API_DOCUMENTATION_URL}`);
+      logger.info(`Server is running on ${env.SERVER_URL}`);
+      logger.info(`API Documentation: ${env.SERVER_URL}/api-docs`);
     });
   } catch (error) {
     const errorMessage = getErrorMessage(error);

@@ -1,34 +1,61 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { Application } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
-import path from "path";
-import { errorHandler, notFound } from "./middlewares/error.middleware";
+import swaggerUi from "swagger-ui-express";
+import { env } from "./config/env";
+import { swaggerSpec } from "./config/swagger";
+import { errorHandler } from "./middlewares/error.middleware";
+
 import { requestLogger } from "./middlewares/logger.middleware";
 import routes from "./routes";
-const app: Application = express();
 
-// Middleware
-app.use(express.static(path.join(__dirname, "../public")));
+const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+// Middlewares
 app.use(helmet());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+  })
+);
+
 app.use(cookieParser());
-app.use(requestLogger);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// API Documentation
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: ".swagger-ui .topbar { display: none }",
+  })
+);
 
 // Routes
-app.get("/", (req, res) => {
-  res.json({ message: "Hello World" });
-});
-
 app.use("/api", routes);
 
-// Not Found Middleware
-app.use(notFound);
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
-// Error Handler
-app.use(errorHandler);
+app.use(requestLogger);
+
+// Error handling
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  errorHandler(err, req, res, next);
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
 
 export default app;

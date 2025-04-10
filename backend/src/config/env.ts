@@ -13,7 +13,7 @@ export const env = {
   REFRESH_TOKEN_SECRET: (process.env.REFRESH_TOKEN_SECRET as string) || "default_secret",
   ACCESS_TOKEN_EXPIRES_IN: parseInt(process.env.ACCESS_TOKEN_EXPIRES_IN as string) || 900,
   REFRESH_TOKEN_EXPIRES_IN: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN as string) || 86400000,
-  POSTMAN_API_DOCUMENTATION_URL: (process.env.POSTMAN_API_DOCUMENTATION_URL as string) || "",
+  SERVER_URL: (process.env.SERVER_URL as string) || "http://localhost:5000",
 };
 
 // Production-specific checks for missing important environment variables
