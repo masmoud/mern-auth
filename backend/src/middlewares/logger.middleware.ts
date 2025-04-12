@@ -4,106 +4,102 @@ import { logger } from "../utils/logger";
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
 
-  // Skip logging for /favicon.ico
   if (req.path === "/favicon.ico") return next();
 
-  const ENABLE_PRETTY_LOG = true;
-  const ENABLE_JSON_LOG = false; // Set to true if you prefer JSON logs
+  const ENABLE_JSON_LOG = false;
+  const timestamp = new Date().toISOString();
 
-  // Filter and redact sensitive cookies
-  const getFilteredCookies = (cookies: Record<string, string>) => {
-    const allowedCookies = ["accessToken", "refreshToken"];
-    return allowedCookies.reduce((acc, key) => {
-      if (cookies?.[key]) acc[key] = "[REDACTED]";
-      return acc;
-    }, {} as Record<string, string>);
+  const redactCookies = (cookies: Record<string, string>) => {
+    const allowed = ["accessToken", "refreshToken"];
+    return Object.fromEntries(
+      Object.entries(cookies || {}).map(([k, v]) =>
+        allowed.includes(k) ? [k, "[REDACTED]"] : [k, v]
+      )
+    );
   };
 
-  // Filter headers (e.g. remove Authorization)
-  const getFilteredHeaders = (headers: Record<string, any>) => {
-    const filtered = { ...headers };
-    if (filtered.authorization) {
-      filtered.authorization = "[REDACTED]";
-    }
-    return filtered;
+  const redactHeaders = (headers: Record<string, any>) => {
+    const redacted = { ...headers };
+    if (redacted.authorization) redacted.authorization = "[REDACTED]";
+    return redacted;
   };
 
-  // Mask password if it's a login or register route
   const sanitizeBody = (path: string, body: any) => {
-    if (
-      (path === "/api/auth/login" || path === "/api/auth/register") &&
-      typeof body === "object" &&
-      body?.password
-    ) {
+    if (["/api/auth/login", "/api/auth/register"].includes(path) && body?.password) {
       return { ...body, password: "[REDACTED]" };
     }
     return body;
   };
 
-  const logRequest = () => {
-    try {
-      const sanitizedBody = sanitizeBody(req.path, req.body);
-      const logData = {
-        method: req.method,
-        path: req.originalUrl,
-        timestamp: new Date().toISOString(),
-        ip: req.ip,
-        query: req.query,
-        body: sanitizedBody,
-        cookies: getFilteredCookies(req.cookies || {}),
-        headers: getFilteredHeaders(req.headers),
-      };
-
-      if (ENABLE_JSON_LOG) {
-        logger.info(JSON.stringify(logData, null, 2));
-      }
-
-      if (ENABLE_PRETTY_LOG) {
-        const lines = [
-          "Incoming Request",
-          `method: ${logData.method}`,
-          `path: ${logData.path}`,
-          `timestamp: ${logData.timestamp}`,
-          `ip: ${logData.ip}`,
-          `query: ${JSON.stringify(logData.query, null, 2)}`,
-          `body: ${JSON.stringify(logData.body, null, 2)}`,
-        ];
-        logger.info(lines.join("\n"));
-      }
-    } catch (error) {
-      console.error("Logging error:", error);
-      next(error);
-    }
+  const logData = {
+    method: req.method,
+    path: req.originalUrl,
+    timestamp,
+    ip: req.ip,
+    query: req.query,
+    body: sanitizeBody(req.path, req.body),
+    cookies: redactCookies(req.cookies),
+    headers: redactHeaders(req.headers),
   };
 
-  logRequest();
+  if (ENABLE_JSON_LOG) {
+    logger.info(`[Request] ${JSON.stringify(logData, null, 2)}`);
+  } else {
+    logger.info(
+      [
+        "[Request]",
+        `method: ${logData.method}`,
+        `path: ${logData.path}`,
+        `timestamp: ${logData.timestamp}`,
+        `query: ${JSON.stringify(logData.query, null, 2)}`,
+        `body: ${JSON.stringify(logData.body, null, 2)}`,
+      ].join("\n")
+    );
+  }
+
+  // Capture response
+  const originalSend = res.send;
+  res.send = function (body) {
+    (res as any).__responseBody = body;
+    return originalSend.call(this, body);
+  };
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    const resultLabel = res.statusCode >= 400 ? "Request Failed" : "Request Succeeded";
-    const body = (res as any).__responseBody || {};
+    const status = res.statusCode;
 
-    const lines = [
-      resultLabel,
-      `method: ${req.method}`,
-      `path: ${req.originalUrl}`,
-      `status: ${res.statusCode}`,
-      `responsetime: ${duration} ms`,
-      `timestamp: ${new Date().toISOString()}`,
-    ];
+    // Skip logging here for server errors (handled by errorLogger)
+    if (status >= 500) return;
 
-    if (Object.keys(body).length > 0) {
-      lines.push(`response: ${JSON.stringify(body)}`);
-    }
+    const result = status >= 400 ? "Failed" : "Succeeded";
+    const level = status >= 400 ? "warn" : "info";
 
-    const level = res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
-    logger[level](lines.join("\n"));
+    logger[level](
+      [
+        `[Response] ${result}`,
+        `method: ${req.method}`,
+        `path: ${req.originalUrl}`,
+        `status: ${status}`,
+        `duration: ${duration} ms`,
+        `timestamp: ${timestamp}`,
+      ].join("\n")
+    );
   });
 
   next();
 };
 
 export const errorLogger = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  logger.error(`${err.name}: ${err.message}`);
+  logger.error(
+    [
+      "[Error]",
+      `message: ${err.message}`,
+      `stack: ${(err.stack || "").split("\n").slice(0, 3).join("\n")}`,
+      `method: ${req.method}`,
+      `path: ${req.originalUrl}`,
+      `status: ${res.statusCode}`,
+      `timestamp: ${new Date().toISOString()}`,
+    ].join("\n")
+  );
   next(err);
 };

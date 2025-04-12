@@ -18,8 +18,10 @@ const winstonLogger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    winston.format.printf(({ level, message, timestamp }) => {
-      return `[${timestamp}] ${level}: ${message}`;
+    winston.format.printf(({ level, message, timestamp, ...meta }) => {
+      return `[${timestamp}] ${level}: ${message} ${
+        Object.keys(meta).length ? JSON.stringify(meta) : ""
+      }`;
     })
   ),
   transports: [
@@ -43,20 +45,20 @@ const pinoLogger = pino({
 
 // Unified logger
 export const logger = {
-  info: (msg: string) => {
-    winstonLogger.info(msg);
-    pinoLogger.info(msg);
+  info: (message: string, data?: any) => {
+    winstonLogger.info(message, data);
+    pinoLogger.info(data ? { message, ...data } : message);
   },
-  warn: (msg: string) => {
-    winstonLogger.warn(msg);
-    pinoLogger.warn(msg);
+  warn: (message: string, data?: any) => {
+    winstonLogger.warn(message, data);
+    pinoLogger.warn(data ? { message, ...data } : message);
   },
-  error: (msg: string) => {
-    winstonLogger.error(msg);
-    pinoLogger.error(msg);
+  error: (message: string, data?: any) => {
+    winstonLogger.error(message, data);
+    pinoLogger.error(data ? { message, ...data } : message);
   },
-  debug: (msg: string) => {
-    winstonLogger.debug(msg);
-    pinoLogger.debug(msg);
+  debug: (message: string, data?: any) => {
+    winstonLogger.debug(message, data);
+    pinoLogger.debug(data ? { message, ...data } : message);
   },
 };
