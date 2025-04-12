@@ -36,10 +36,10 @@ const login = async (email: string, password: string) => {
   }
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    throw new BadRequestError("Invalid password");
+    throw new BadRequestError("Invalid credentials");
   }
 
-  const accessToken = generateToken(user._id);
+  const accessToken = generateToken(user._id, user.name, user.email, user.role);
   const refreshToken = generateRefreshToken(user._id);
 
   return {
@@ -65,7 +65,7 @@ const refreshToken = async (userId: string) => {
   }
 
   // Générer un nouvel access token
-  const accessToken = generateToken(user._id);
+  const accessToken = generateToken(user._id, user.name, user.email, user.role);
 
   return {
     success: true,

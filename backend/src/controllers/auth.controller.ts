@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import User from "../models/user.model";
 import authService from "../services/auth.service";
-import { generateToken, verifyRefreshToken } from "../utils/jwt";
+import { generateToken, TokenPayload, verifyRefreshToken, verifyToken } from "../utils/jwt";
 
 interface JwtPayload {
   userId: string;
@@ -160,6 +160,38 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const protectedRoute = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { accessToken } = req.cookies;
+    if (!accessToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized - No access token",
+      });
+    }
+    const decoded = verifyToken(accessToken) as TokenPayload;
+    if (!decoded) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized - Invalid access token",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Access granted -Protected route",
+      user: {
+        _id: decoded.userId,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * @swagger
  * /api/auth/refresh-token:
@@ -245,7 +277,7 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     // Générer un nouvel access token
-    const accessToken = generateToken(user._id);
+    const accessToken = generateToken(user._id, user.name, user.email, user.role);
 
     // Définir le cookie avec le nouvel access token
     res.cookie("accessToken", accessToken, {
@@ -266,4 +298,4 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export default { register, login, logout, refreshToken };
+export default { register, login, logout, refreshToken, protectedRoute };
