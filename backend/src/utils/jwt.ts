@@ -3,8 +3,11 @@ import { env } from "../config/env";
 import { BadRequestError } from "./errors";
 
 // Payload JWT
-interface TokenPayload extends JwtPayload {
+export interface TokenPayload extends JwtPayload {
   userId: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
 // Common signature options
@@ -13,12 +16,17 @@ const commonSignOptions: SignOptions = {
   issuer: "mern-auth-api",
 };
 
-export const generateToken = (userId: string): string => {
+export const generateToken = (
+  userId: string,
+  name: string,
+  email: string,
+  role: string
+): string => {
   const options: SignOptions = {
     ...commonSignOptions,
     expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
   };
-  return jwt.sign({ userId }, env.ACCESS_TOKEN_SECRET as Secret, options);
+  return jwt.sign({ userId, name, email, role }, env.ACCESS_TOKEN_SECRET as Secret, options);
 };
 
 export const verifyToken = (token: string): TokenPayload => {
