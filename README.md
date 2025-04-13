@@ -83,8 +83,8 @@ A complete authentication application built with the MERN stack (MongoDB, Expres
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/masmoud/mern-auth-app.git
-cd mern-auth-app
+git clone https://github.com/masmoud/mern-auth.git
+cd mern-auth
 ```
 
 ### 2. Install dependencies
