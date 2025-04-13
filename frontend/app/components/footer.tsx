@@ -6,24 +6,24 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-gray-600 text-sm mb-4 md:mb-0">
-            © {new Date().getFullYear()} MERN Auth. Tous droits réservés.
+            © {new Date().getFullYear()} Mohamed Amoussa
           </div>
 
           <div className="flex gap-6">
             <NavLink
               to="#"
               className="text-gray-500 hover:text-blue-600 text-sm transition-colors duration-200">
-              À propos
+              Portfolio
             </NavLink>
             <NavLink
               to="#"
               className="text-gray-500 hover:text-blue-600 text-sm transition-colors duration-200">
-              Confidentialité
+              GitHub
             </NavLink>
             <NavLink
               to="#"
               className="text-gray-500 hover:text-blue-600 text-sm transition-colors duration-200">
-              Conditions
+              LinkedIn
             </NavLink>
           </div>
         </div>

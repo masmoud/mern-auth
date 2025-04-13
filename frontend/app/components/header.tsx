@@ -1,10 +1,12 @@
 import { NavLink } from "react-router";
+import useAuthStore from "~/stores/use-auth-store";
+
 const Header = () => {
-  let isAuthenticated = false;
+  const { isAuthenticated, logout } = useAuthStore();
   return (
     <header className="bg-white shadow-sm">
       <nav className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center">
           <NavLink to="/" className="text-xl font-bold text-blue-600">
             MERN Auth
           </NavLink>
@@ -37,9 +39,7 @@ const Header = () => {
                 </NavLink>
                 <button
                   className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
-                  onClick={() => {
-                    isAuthenticated = false;
-                  }}>
+                  onClick={() => logout()}>
                   Logout
                 </button>
               </>

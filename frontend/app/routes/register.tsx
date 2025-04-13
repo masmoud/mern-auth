@@ -1,4 +1,6 @@
-import { Link } from "react-router";
+import toast from "react-hot-toast";
+import { Link, redirect, useFetcher } from "react-router";
+import registerUser from "~/auth/register-user";
 import type { Route } from "./+types/register";
 
 export function meta({}: Route.MetaArgs) {
@@ -8,8 +10,30 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+export async function clientAction({ request }: Route.ActionArgs) {
+  try {
+    const formData = await request.formData();
+    const result = await registerUser(formData);
+    console.log(result);
+
+    if (result.success === true) {
+      toast.success(result.message);
+      return redirect("/sign-in");
+    } else {
+      toast.error(result.message);
+      return { error: result.message };
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong" };
+  }
+}
 const Register = () => {
-  let error = null;
+  const fetcher = useFetcher();
+  console.log(fetcher.data);
+
+  const error = fetcher.data?.error;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm">
@@ -17,13 +41,13 @@ const Register = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign Up</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{" "}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link to="/sign-in" className="font-medium text-blue-600 hover:text-blue-500">
               Login to your account
             </Link>
           </p>
         </div>
 
-        <form className="mt-8 border-none space-y-6">
+        <fetcher.Form method="post" className="mt-8 border-none space-y-6 text-center">
           {error && <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm">{error}</div>}
 
           <div className="rounded-md  space-y-4">
@@ -100,7 +124,7 @@ const Register = () => {
               Sign Up
             </button>
           </div>
-        </form>
+        </fetcher.Form>
       </div>
     </div>
   );

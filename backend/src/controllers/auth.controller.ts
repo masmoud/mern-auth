@@ -43,7 +43,11 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, password, role } = req.body;
     const user = await authService.register(name, email, password, role);
-    res.status(201).json(user);
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      user,
+    });
   } catch (error) {
     next(error);
   }

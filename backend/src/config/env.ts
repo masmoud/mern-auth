@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 export const env = {
   NODE_ENV: (process.env.NODE_ENV as string) || "development",
-  PORT: parseInt(process.env.PORT as string) || 5000,
+  PORT: parseInt((process.env.PORT as string) || "5000"),
   CLIENT_URL: (process.env.CLIENT_URL as string) || "http://localhost:5173",
   MONGO_URI: (process.env.MONGO_URI as string) || "",
   ACCESS_TOKEN_SECRET: (process.env.ACCESS_TOKEN_SECRET as string) || "default_secret",
