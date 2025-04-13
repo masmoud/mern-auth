@@ -4,7 +4,8 @@
   "description": "Voici un README.md template spécialement conçu pour ton application d'authentification MERN avec TypeScript, JWT, Winston, et bcryptjs. Tu pourras le remplir facilement au fur et à mesure :",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "concurrently \"npm run start --prefix backend\" \"npm run start --prefix frontend\"",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
   },
   "repository": {
     "type": "git",
@@ -17,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/masmoud/mern-auth/issues"
   },
-  "homepage": "https://github.com/masmoud/mern-auth#readme"
+  "homepage": "https://github.com/masmoud/mern-auth#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
